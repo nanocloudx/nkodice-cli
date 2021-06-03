@@ -48,20 +48,23 @@ function playTurn(status: Status) {
 
   console.log(`Score: ${Math.ceil(currentStatus.score)}`)
 
-  if (currentStatus.continueCount >= 1) {
-    const answer = prompt('Do you want continue?(Y/n)')
-    if (answer === null || answer === 'Y' || answer === 'y') {
-      playTurn({
-        ...currentStatus,
-        turnCount: currentStatus.turnCount + 1,
-        continueCount: currentStatus.continueCount - 1
-      })
-    } else {
-      gameover(currentStatus)
-    }
-  } else {
+  if (currentStatus.continueCount === 0) {
     gameover(currentStatus)
+    return
   }
+
+  const answer = prompt('Do you want continue?(Y/n)')
+
+  if (answer !== null && answer !== 'Y' && answer !== 'y') {
+    gameover(currentStatus)
+    return
+  }
+
+  playTurn({
+    ...currentStatus,
+    turnCount: currentStatus.turnCount + 1,
+    continueCount: currentStatus.continueCount - 1
+  })
 }
 
 function gameover(status: Status) {
