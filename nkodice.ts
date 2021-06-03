@@ -37,7 +37,7 @@ function playTurn(status: Status) {
     return
   }
 
-  console.log(`Turn: ${status.turnCount} (Continue: ${status.continueCount})`)
+  console.log(`Roll: ${status.turnCount} (Continue: ${status.continueCount})`)
   console.log(`Dice: ${status.diceCount}`)
   console.log('')
 
@@ -48,18 +48,27 @@ function playTurn(status: Status) {
 
   console.log(`Score: ${Math.ceil(currentStatus.score)}`)
 
-  if (currentStatus.continueCount >= 1 && confirm('Do you want continue?')) {
-    playTurn({
-      ...currentStatus,
-      turnCount: currentStatus.turnCount + 1,
-      continueCount: currentStatus.continueCount - 1
-    })
+  if (currentStatus.continueCount >= 1) {
+    const answer = prompt('Do you want continue?(Y/n)')
+    if (answer === null || answer === 'Y' || answer === 'y') {
+      playTurn({
+        ...currentStatus,
+        turnCount: currentStatus.turnCount + 1,
+        continueCount: currentStatus.continueCount - 1
+      })
+    } else {
+      gameover(currentStatus)
+    }
   } else {
-    console.log('--------------------------------------------------')
-    console.log('GAMEOVER!')
-    console.log(`TotalScore: ${Math.ceil(currentStatus.score)}`)
-    console.log('--------------------------------------------------')
+    gameover(currentStatus)
   }
+}
+
+function gameover(status: Status) {
+  console.log('--------------------------------------------------')
+  console.log('GAMEOVER!')
+  console.log(`TotalScore: ${Math.ceil(status.score)}`)
+  console.log('--------------------------------------------------')
 }
 
 /**
@@ -67,7 +76,7 @@ function playTurn(status: Status) {
  */
 function rollDice(status: Status): Status {
   const d = ['う', 'ま', 'ち', 'お', 'こ', 'ん', '-']
-  const faces = [...Array(status.diceCount)].map(() => d[Math.floor(Math.random() * d.length)])
+  const faces = [...Array(status.diceCount)].map(() => d[Math.floor(Math.random() * d.length)]).sort()
   return {
     ...status,
     faces,
@@ -228,7 +237,9 @@ function judgeWords(status: Status): Status {
   let diceCount = status.diceCount
   // 複数の役が成立した場合2つ目の役から次回のダイス数+1
   if (detectWordCount >= 2) {
-    diceCount += detectWordCount - 1
+    diceCount = 4 + detectWordCount
+  } else {
+    diceCount = 5
   }
   // おちんちん成立時は次回のダイス数10
   if (combo.OCHINCHIN) {
